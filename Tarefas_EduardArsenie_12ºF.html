@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Lista de tarefas
+        </title>
+        <link rel="stylesheet" href="jquery-ui.min.css">
+        <script src="external/jquery/jquery.js"></script>
+        <script src="jquery-ui.min.js"></script>
+        <!-- Codigo para o estilo do container; butões; incons e divisores -->
+        <style>
+            #container{
+                width:700px;
+                height: 450px;
+                margin: 70px auto;
+                border: 2px solid rgb(255,110,14);
+            }
+            h2{
+                color: rgb(255,110,14);
+                text-align:center;
+            }
+            #projects{
+                width: 650px;
+                height: 250px;
+                margin: 0px auto;
+            }
+            ol li{
+                cursor: pointer;
+                padding: 5px;
+                margin-bottom: 10px;
+            }
+            ol li:hover{
+                background: #ff6e0e;
+            }
+            #btnAddProject{
+                margin-left: 500px;
+                margin-bottom: 11px;
+                background: orange;
+            }
+            #btnAddTask{
+                margin-left: 500px;
+                margin-top: 11px;
+                background: orange;
+            }
+            .ui-icon-close{
+                cursor:pointer;
+            }
+        </style>
+        <script>
+            $(document).ready(function(){
+                <!-- Codigo para o container principal -->
+                $("input[type=checkbox]").removeAttr("checked");
+                $("#projects").tabs();
+                $("ul").sortable({axis:"x", containment:"#projects"});
+                $("ol").sortable({axis:"y", containment:"#projects"});
+                <!-- Codigo para o funcionamento do checkbox para terminação de tarefas-->
+                $("#projects").on("click", "input[type=checkbox]", function(){
+                    $(this).closest("li").slideUp(function(){
+                        $(this).remove();
+                    });
+                });
+                <!-- Codigo para o icon de fecho de projetos -->
+                $("#projects").on("click","span.ui-icon-close", function(){
+                    var index = $(this).closest("li").index();
+                    var id = $("#main li:eq(" + index + ") a").attr("href");
+                    $("#main li:eq(" + index + ")").remove();
+                    $(id).remove();
+                    $("#projects").tabs("refresh");
+                });
+                <!-- Codigo para o funcionamento do butão que cria uma nova tarefa-->
+                $("#btnAddTask").button().click(function(){
+                    $("#task-box").dialog({width:400, resizable:false, modal:true,
+                            buttons:{
+                                "Adiciona novo tarefa": function(){
+                                    $("#projects").tabs("refresh");
+                                    var activeTab = $("#projects").tabs("option","active");
+                                    var title = $("#main > li:nth-child("+ (activeTab + 1) +") > a").attr("href");
+                                    $("#projects " + title).append("<li><input type='checkbox'>" + $("#newtask").val() + "</li>");
+                                    $("#newtask").val("");
+                                    $(this).dialog("close");
+                                },
+                                <!-- Codigo para o funcionamento do que fecha o dialogo que aparece quando clicamos nos butões de criação de projeto ou de tarefa -->
+                                "Anular":function(){
+                                    $("#newtask").val("");
+                                    $(this).dialog("close");
+                                }
+                            }
+                        })
+                });
+                <!-- Codigo para o funcionamento do butão para adicionar projeto -->
+                $("#btnAddProject").button().click(function(){
+                    $("#project-box").dialog({width:400, resizable:false, modal:true, buttons:{
+                        "Adicione novo projeto":function(){
+                            var projectName = $("#newproject").val();
+                            var replaceName = projectName.split(" ").join("_");
+                            $("<li><a href='#" + replaceName + "'>" + projectName + "</a><span class='ui-icon ui-icon-close'></li>").appendTo("#main");
+                            $("<ol id='" + replaceName + "'></ol>").appendTo("#projects").sortable();
+                            $("#projects").tabs("refresh");
+                            var tabCount = $("#projects .ui-tabs-nav li").lenght;
+                            $("#projects").tabs("option", "active", tabCount-1);
+                            $("#newproject").val("");
+                            $(this).dialog("close");
+                        },
+                        <!-- Codigo para o funcionamento do que fecha o dialogo que aparece quando clicamos nos butões de criação de projeto ou de tarefa -->
+                        "Anular":function(){
+                            $("#newproject").val("");
+                            $(this).dialog("close");
+                        },
+                    }});
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="container">
+            <!-- O container principal com o titulo "Lista de tarefas" e o botão para adicionar projeto e de adicionar tarefa no respetivo projeto-->
+            <h2>Lista de tarefas</h2>
+            <button id="btnAddProject">Adiciona projeto</button>
+            <div id="projects">
+                <!-- Mostra os projetos criados-->
+                <ul id="main">
+                    <li><a href="#personal">Pessoal</a><span class="ui-icon ui-icon-close"></span></li>
+                    <li><a href="#work">Trabalho</a><span class="ui-icon ui-icon-close"></span></li>
+                </ul>
+                <!-- Mostra as tarefas do projeto chamado "Work"-->
+                <ol id="work">
+                    <li><input type="checkbox">Trabalho PAP</li>
+                    <li><input type="checkbox">Trabalho de projeto PSI</li>
+                </ol>
+                <!-- Mostra as tarefas do projeto chamado "Pessoal"-->
+                <ol id="personal">
+                    <li><input type="checkbox">Comprar frutas</li>
+                    <li><input type="checkbox">Ligar para o banco</li>
+                </ol>
+            </div>
+            <!-- Butão para adicionar um projeto e o campo para o nome do projeto -->
+            <button id="btnAddTask">Adiciona uma tarefa</button>
+            <div id="project-box" title="Adicione projeto" style="display: none;">
+                <label for="newproject">Nome do projeto:</label><input id="newproject" type="text"/>
+            </div>
+            <!-- Butão para adicionar uma tarefa e o campo para o nome da tarefa -->
+            <div id="task-box" title="Adicione tarefa" style="display: none;">
+                <label for="newtask">Nome da tarefa:</label><input id="newtask" type="text"/>
+            </div>
+        </div>
+    </body>
+</html>
